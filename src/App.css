@@ -1,0 +1,363 @@
+/* src/App.css */
+
+/* Layout & Grid */
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px 100px;
+    /* Bottom padding for bottom nav */
+    min-height: 100vh;
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding-bottom: 40px;
+    }
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 640px) {
+    .grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (min-width: 768px) {
+    .grid-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+/* Navigation */
+.nav-desktop {
+    display: none;
+}
+
+.nav-mobile {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 24px;
+    /* Init safe area for iPhone X+ */
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    z-index: 100;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    padding: 4px 0;
+}
+
+.nav-item.active {
+    color: #3b82f6;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+/* SVGs as masks for icons would be ideal, but for now we'll use simple shapes or unicode if needed, 
+   or just styled divs. Let's use simple CSS shapes or emojis for now to keep it simple without assets. 
+   Actually, let's just use text/emoji or simple svg paths in jsx. 
+   Here we just define layout. */
+
+@media (min-width: 768px) {
+    .nav-desktop {
+        display: flex;
+        gap: 4px;
+        background-color: #e2e8f0;
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 24px;
+    }
+
+    .nav-mobile {
+        display: none;
+    }
+}
+
+/* Cards & Sections */
+.section {
+    margin-bottom: 32px;
+    background-color: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Balance Card */
+.balance-card {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    border-radius: 20px;
+    padding: 28px 24px;
+    margin: 16px 0 24px;
+    color: #fff;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.balance-card::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+}
+
+.balance-value {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-top: 4px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Floating Action Button for Mobile Add */
+.fab-add {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: #3b82f6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    z-index: 90;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.fab-add:active {
+    transform: scale(0.95);
+}
+
+@media (min-width: 768px) {
+    .fab-add {
+        display: none;
+        /* Desktop uses inline button */
+    }
+}
+
+/* Add Button (Desktop) */
+.btn-add-desktop-wrap {
+    display: none;
+}
+
+.btn-add-desktop {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .btn-add-desktop-wrap {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .btn-add-desktop {
+        display: block;
+        flex: 1;
+        padding: 16px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background-color: transparent;
+        color: #3b82f6;
+        font-weight: 700;
+        font-size: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-add-desktop:hover {
+        background-color: #f1f5f9;
+        border-color: #94a3b8;
+    }
+}
+
+/* Modal Responsive */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Mobile: bottom sheet style */
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    width: 100%;
+    max-width: 500px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+    .modal-overlay {
+        align-items: center;
+        /* Desktop: center modal */
+        padding: 16px;
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        animation: fadeIn 0.2s ease-out;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Utility */
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.text-sm {
+    font-size: 12px;
+}
+
+.text-xs {
+    font-size: 10px;
+}
+
+.text-muted {
+    color: #64748b;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Hide scrollbar for clean look in valid areas */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Responsive Table */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-min-width {
+    min-width: 600px;
+    /* Force scroll on small screens */
+}
+
+/* Spinner Animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
