@@ -31,7 +31,7 @@ export default function App() {
 }
 
 function AppContent() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAnonymous, signInWithGoogle, sendMagicLink, linkEmailPassword } = useAuth();
   const {
     items, balance, loading,
     saveItem: firestoreSaveItem, deleteItem: firestoreDeleteItem,
@@ -56,6 +56,13 @@ function AppContent() {
   const [showReceiptReview, setShowReceiptReview] = useState(false);
   const [receiptResult, setReceiptResult] = useState(null);
   const [showFabMenu, setShowFabMenu] = useState(false);
+  const [showLinkAccount, setShowLinkAccount] = useState(false);
+  const [linkEmail, setLinkEmail] = useState("");
+  const [linkPassword, setLinkPassword] = useState("");
+  const [linkMode, setLinkMode] = useState("email"); // email | magiclink
+  const [linkError, setLinkError] = useState("");
+  const [linkLoading, setLinkLoading] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
 
   const askConfirm = (message) => new Promise(resolve => {
     setConfirmDialog({ message, onOk: () => { setConfirmDialog(null); resolve(true); }, onCancel: () => { setConfirmDialog(null); resolve(false); } });
@@ -137,6 +144,139 @@ function AppContent() {
   return (
     <div style={S.root} className="container">
       {toastMsg && <div style={S.toast}>{toastMsg}</div>}
+
+      {/* Anonymous User Banner */}
+      {isAnonymous && (
+        <div style={anonStyles.banner}>
+          <div style={anonStyles.text}>
+            ゲストモードで利用中です。データを保持するにはアカウントを作成してください。
+          </div>
+          <div style={migrationStyles.actions}>
+            <button style={migrationStyles.btnMigrate} onClick={() => setShowLinkAccount(true)}>
+              アカウント作成
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Link Account Modal */}
+      {showLinkAccount && (
+        <div className="modal-overlay" onClick={() => setShowLinkAccount(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h2 style={{ ...S.title, marginBottom: 16 }}>アカウントを作成</h2>
+            <p style={{ fontSize: 13, color: "#64748b", marginBottom: 16 }}>
+              現在のデータを引き継いでアカウントを作成します。
+            </p>
+
+            {linkSent ? (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>✉️</div>
+                <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>ログインリンクを送信しました</p>
+                <p style={{ fontSize: 13, color: "#64748b" }}>
+                  <strong>{linkEmail}</strong> にリンクを送信しました。メール内のリンクをクリックしてアカウントを連携してください。
+                </p>
+                <button style={{ ...S.btnPrimary, marginTop: 16 }} onClick={() => { setShowLinkAccount(false); setLinkSent(false); }}>
+                  閉じる
+                </button>
+              </div>
+            ) : (
+              <>
+                {linkMode === "magiclink" ? (
+                  <>
+                    <label style={S.label}>メールアドレス</label>
+                    <input style={S.input} type="email" value={linkEmail}
+                      onChange={e => setLinkEmail(e.target.value)} placeholder="example@email.com" />
+                    <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+                      パスワード不要。メールに届くリンクからアカウントを連携できます。
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <label style={S.label}>メールアドレス</label>
+                    <input style={S.input} type="email" value={linkEmail}
+                      onChange={e => setLinkEmail(e.target.value)} placeholder="example@email.com" />
+                    <label style={S.label}>パスワード</label>
+                    <input style={S.input} type="password" value={linkPassword}
+                      onChange={e => setLinkPassword(e.target.value)} placeholder="6文字以上" minLength={6} />
+                  </>
+                )}
+
+                {linkError && <div style={{ color: "#ef4444", fontSize: 12, marginTop: 8, padding: "8px 12px", backgroundColor: "#fef2f2", borderRadius: 8 }}>{linkError}</div>}
+
+                <button
+                  style={{ ...S.btnPrimary, width: "100%", marginTop: 16 }}
+                  disabled={linkLoading}
+                  onClick={async () => {
+                    setLinkError("");
+                    setLinkLoading(true);
+                    try {
+                      if (linkMode === "magiclink") {
+                        await sendMagicLink(linkEmail);
+                        setLinkSent(true);
+                      } else {
+                        await linkEmailPassword(linkEmail, linkPassword);
+                        setShowLinkAccount(false);
+                        toast("アカウント作成完了！");
+                      }
+                    } catch (err) {
+                      const msgs = {
+                        "auth/email-already-in-use": "このメールアドレスは既に使用されています",
+                        "auth/invalid-email": "メールアドレスの形式が正しくありません",
+                        "auth/weak-password": "パスワードは6文字以上にしてください",
+                      };
+                      setLinkError(msgs[err.code] || err.message);
+                    } finally {
+                      setLinkLoading(false);
+                    }
+                  }}
+                >
+                  {linkLoading ? "処理中..." : linkMode === "magiclink" ? "リンクを送信" : "アカウント作成"}
+                </button>
+
+                <button
+                  style={{ width: "100%", padding: 10, marginTop: 8, border: "none", backgroundColor: "transparent", color: "#3b82f6", fontWeight: 600, fontSize: 13, cursor: "pointer" }}
+                  onClick={() => { setLinkMode(linkMode === "email" ? "magiclink" : "email"); setLinkError(""); }}
+                >
+                  {linkMode === "email" ? "パスワードなしでリンク（メールリンク）" : "パスワードでアカウント作成"}
+                </button>
+
+                <div style={{ display: "flex", alignItems: "center", margin: "12px 0", gap: 12 }}>
+                  <span style={{ fontSize: 12, color: "#94a3b8", margin: "0 auto" }}>または</span>
+                </div>
+
+                <button
+                  style={{ width: "100%", padding: 12, borderRadius: 10, border: "2px solid #e2e8f0", backgroundColor: "#fff", color: "#1e293b", fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+                  disabled={linkLoading}
+                  onClick={async () => {
+                    setLinkError("");
+                    setLinkLoading(true);
+                    try {
+                      await signInWithGoogle();
+                      setShowLinkAccount(false);
+                      toast("Googleアカウントと連携しました！");
+                    } catch (err) {
+                      if (err.code !== "auth/popup-closed-by-user") {
+                        setLinkError("Googleアカウントとの連携に失敗しました");
+                      }
+                    } finally {
+                      setLinkLoading(false);
+                    }
+                  }}
+                >
+                  Googleアカウントと連携
+                </button>
+
+                <button
+                  style={{ width: "100%", padding: 10, marginTop: 12, border: "none", backgroundColor: "transparent", color: "#94a3b8", fontSize: 13, cursor: "pointer" }}
+                  onClick={() => setShowLinkAccount(false)}
+                >
+                  あとで
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Migration Banner */}
       {migrationInfo && migrationInfo.reason === "ready" && (
@@ -324,6 +464,22 @@ const fabStyles = {
     fontSize: 13,
     fontWeight: 700,
     color: "#1e293b",
+  },
+};
+
+const anonStyles = {
+  banner: {
+    backgroundColor: "#fefce8",
+    border: "1px solid #fde68a",
+    borderRadius: 12,
+    padding: "14px 16px",
+    marginBottom: 16,
+  },
+  text: {
+    fontSize: 13,
+    color: "#92400e",
+    fontWeight: 600,
+    marginBottom: 8,
   },
 };
 
