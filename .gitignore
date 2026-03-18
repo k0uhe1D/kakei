@@ -9,6 +9,9 @@ dist/
 .env
 .env.local
 .env.*.local
+functions/.env
+functions/.env.*
+!functions/.env.example
 
 # IDE
 .vscode/
@@ -28,3 +31,6 @@ firebase-debug.*.log
 
 # Misc
 *.local
+backup.json
+.agents/
+.claude/
