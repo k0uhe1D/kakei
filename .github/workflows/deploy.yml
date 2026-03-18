@@ -33,6 +33,7 @@ jobs:
         run: npm run build
 
       - name: Install functions dependencies
+        if: ${{ vars.ENABLE_FUNCTIONS_DEPLOY == 'true' }}
         run: npm ci --prefix functions
 
       - name: Deploy to Firebase
@@ -51,6 +52,7 @@ jobs:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy Cloud Functions
+        if: ${{ vars.ENABLE_FUNCTIONS_DEPLOY == 'true' }}
         uses: w9jds/firebase-action@v13.29.1
         with:
           args: deploy --only functions --project kakei-planner-app
